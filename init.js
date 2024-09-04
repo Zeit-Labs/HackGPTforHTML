@@ -1,7 +1,7 @@
 /*
 Embed me into Open edX using the following script snippet:
 
-<script src="https://gist.githubusercontent.com/OmarIthawi/f7ca1610d767b8f9202c1e8aaf8d2bed/raw/master/init.js"></script>
+<script src="https://raw.githubusercontent.com/Zeit-Labs/HackGPTforHTML/main/init.js"></script>
 
  */
 
