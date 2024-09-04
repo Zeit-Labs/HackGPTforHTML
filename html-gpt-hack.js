@@ -1,13 +1,23 @@
 /*
+
+Serve it locally:
+
+    Terminal 1:
+        $ python -m http.server 8080
+
+    Terminal 2:
+        $ ssh -R omardotesting:80:localhost:18000 serveo.net
+
+
 Embed me into Open edX using the following script snippet:
 
-<script src="https://raw.githubusercontent.com/Zeit-Labs/HackGPTforHTML/main/init.js"></script>
+    <script src="https://omardotesting.serveo.net/html-gpt-hack.js"></script>
 
  */
 
 
 (function () {
-    console.log('Hello it the snippet!');
+    console.log('tinymce: Hello it the snippet!');
     const apiCall = function(prompt, callback) {
         setTimeout(() => {
             callback(
@@ -92,6 +102,16 @@ Embed me into Open edX using the following script snippet:
 
     const prompter = window.prompter = function(prompt) {
         basePrompter(promptTemplate(prompt));
+    }
+
+    if (!tinymce._openedxNeLCHijacked) {
+        console.log('tinymce: hacking the init script');
+        tinymce._openedxNeLCHijacked = true;
+        const originalTinyMCEInit = tinymce.init.bind(tinymce);
+        tinymce.init = function(params) {
+            console.log('tinymce: hijacked params', params);
+            // originalTinyMCEInit(params);
+        };
     }
 
     let inputer = `
