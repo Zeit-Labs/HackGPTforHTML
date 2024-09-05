@@ -73,7 +73,7 @@ Embed me into Open edX using the following script snippet:
                 "============ END OF USER HTML ==============", edit the html to match the provided prompt.
         `;
 
-        if (getMCE().getContent().trim().length > 50) {
+        if (getMCE().getContent().trim().length > 20) {
             prompt = `
                 Given the HTML below:
 
@@ -84,7 +84,6 @@ Embed me into Open edX using the following script snippet:
                 Here's what I want: ${prompt}
             `
         }
-
 
         basePrompter(system, prompt, callback);
     }
