@@ -56,9 +56,7 @@ Embed me into Open edX using the following script snippet:
             Avoid returning JavaScript that facilitates XSS or any other injection or security issues.
             The output should be only HTML and CSS.
             Add beautiful styling to the outputted html to match the NeLC (https://nelc.gov.sa/) color branding.
-            
-            Do not style with boxes unless necessary.
-            
+
             Return the HTML in the following structure without head, body, html and other parent elements:
 
             <div class="nelc-studio-gpt-html-prompt-v1">
@@ -69,7 +67,24 @@ Embed me into Open edX using the following script snippet:
                     CONTENT GOES HERE
                 </div>
             </div>
+            
+            If the user provides an HTML between "============ START OF USER HTML ============" and 
+                "============ END OF USER HTML ==============", edit the html to match the provided prompt.
         `;
+
+        if (getMCE().getContent().trim().length > 50) {
+            prompt = `
+                Given the HTML below:
+
+                ============ START OF USER HTML ============
+                ${getMCE().getContent()}    
+                ============ END OF USER HTML ==============
+                
+                Here's what I want: ${prompt}
+            `
+        }
+
+
         basePrompter(system, prompt, callback);
     }
 
@@ -89,7 +104,7 @@ Embed me into Open edX using the following script snippet:
             <div>
                 <style>
                     .gpt-nelc-input .setting-input {
-                        border: 2px solid transparent;
+                        border: 2px solid rgb(178, 178, 178, 0.5);
                         width: 98%;
                         margin-inline-start: -2%;
                         top: -9px;
@@ -100,7 +115,7 @@ Embed me into Open edX using the following script snippet:
                         box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
                     }
                     
-                    .gpt-nelc-input .setting-clear {               
+                    .gpt-nelc-input .setting-clear {
                         position: relative;
                         top: -6px;
                         right: 7px;
@@ -113,13 +128,13 @@ Embed me into Open edX using the following script snippet:
                     /* Animation keyframes for glowing effect */
                     @keyframes gpt-glow {
                       0% {
-                        border: 2px solid rgba(0, 0, 0, 0);
-                      }
-                      50% {
                         border: 2px solid rgb(178, 178, 178, 0.5);
                       }
+                      50% {
+                        border: 2px solid transparent;
+                      }
                       0% {
-                        border: 2px solid rgba(0, 0, 0, 0);
+                        border: 2px solid rgb(178, 178, 178, 0.5);
                       }
                     }
                 </style>
