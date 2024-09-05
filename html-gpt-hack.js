@@ -55,10 +55,9 @@ Embed me into Open edX using the following script snippet:
             Act as a wysiwyg and write a piece of content to.
             Avoid returning JavaScript that facilitates XSS or any other injection or security issues.
             The output should be only HTML and CSS.
-            Add beautiful styling to the outputted html to match the NeLC (https://nelc.gov.sa/) color branding.
-
+            
             Return the HTML in the following structure without head, body, html and other parent elements:
-
+            
             <div class="nelc-studio-gpt-html-prompt-v1">
                 <style>
                     STYLE GOES HERE
@@ -67,6 +66,8 @@ Embed me into Open edX using the following script snippet:
                     CONTENT GOES HERE
                 </div>
             </div>
+            
+            Don't style the parent div.nelc-studio-gpt-html-prompt-v1, only style its content.
             
             If the user provides an HTML between "============ START OF USER HTML ============" and 
                 "============ END OF USER HTML ==============", edit the html to match the provided prompt.
