@@ -10,7 +10,7 @@ Serve it locally:
 
 
 Embed me into Open edX using the following script snippet:
-
+    <script>var NELC_API_URL = xyz</script>
     <script src="https://omardotesting.serveo.net/html-gpt-hack.js"></script>
 
  */
@@ -18,108 +18,147 @@ Embed me into Open edX using the following script snippet:
 
 (function () {
     console.log('tinymce: Hello it the snippet!');
-    const apiCall = function(prompt, callback) {
-        setTimeout(() => {
-            callback(
-                `
-                Note: This was generated using the <code>${prompt}</code> prompt.
-                <div>
-                  <style scoped>
-                    table {
-                      width: 100%;
-                      border-collapse: collapse;
-                    }
-                    th, td {
-                      padding: 10px;
-                      text-align: left;
-                      border-bottom: 1px solid #ddd;
-                    }
-                    th {
-                      background-color: #f2f2f2;
-                      font-weight: bold;
-                    }
-                    tr:hover {
-                      background-color: #f5f5f5;
-                    }
-                    .recovery-rate {
-                      font-weight: bold;
-                      color: #2d862d;
-                    }
-                  </style>
-                
-                  <h2>Top 3 Countries Recovering from COVID-19</h2>
-                  <table>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Country</th>
-                      <th>Total Recoveries</th>
-                      <th>Recovery Rate</th>
-                    </tr>
-                    <tr>
-                      <td>1</td>
-                      <td>Country A</td>
-                      <td>1,000,000</td>
-                      <td class="recovery-rate">95%</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Country B</td>
-                      <td>800,000</td>
-                      <td class="recovery-rate">92%</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Country C</td>
-                      <td>750,000</td>
-                      <td class="recovery-rate">90%</td>
-                    </tr>
-                  </table>
-                </div>
-                `
-            )
-        }, 500)
-    }
-
-    const promptTemplate = function(prompt) {
-        return `
-            Act as a wysiwyg and write a piece of content to ${prompt}. 
-            Use scoped styling.
-        `;
+    console.log('tinymce: API URL is: ', NELC_API_URL);
+    const apiCall = function (system, prompt, callback) {
+        console.time('tinymce: API call');
+        fetch(`${NELC_API_URL}?` + new URLSearchParams({
+            'system': system,
+            'message': prompt,
+        }))
+            .then(response => response.json())
+            .then(data => {
+                console.info('tinymce: result', data);
+                console.timeEnd('tinymce: API call');
+                callback(data.result)
+            })
+            .catch(error => {
+                console.timeEnd('tinymce: API call');
+                console.error('tinymce: Error:', error)
+            });
     }
 
     const getMCE = () => {
         return tinymce.get($('.modal-window textarea').attr('id'))
     };
 
-
-    const basePrompter = window.basePrompter = function(prompt, callback) {
+    const basePrompter = window.basePrompter = function (system, prompt, callback) {
         const mce = getMCE();
-        apiCall(prompt, (html) => {
+        apiCall(system, prompt, (html) => {
+            console.info('tinymce: apiCall called back to basePrompter');
             mce.setContent(html);
-            callback('done');
+            callback ? callback('done') : null;
         });
     };
 
-    const prompter = window.prompter = function(prompt) {
-        basePrompter(promptTemplate(prompt));
+    const prompter = window.prompter = function (prompt, callback) {
+        const system = `
+            Act as a wysiwyg and write a piece of content to.
+            Avoid returning JavaScript that facilitates XSS or any other injection or security issues.
+            The output should be only HTML and CSS.
+            Add beautiful styling to the outputted html to match the NeLC (https://nelc.gov.sa/) color branding.
+            
+            Do not style with boxes unless necessary.
+            
+            Return the HTML in the following structure without head, body, html and other parent elements:
+
+            <div class="nelc-studio-gpt-html-prompt-v1">
+                <style>
+                    STYLE GOES HERE
+                </style>
+                <div>
+                    CONTENT GOES HERE
+                </div>
+            </div>
+        `;
+        basePrompter(system, prompt, callback);
     }
 
-    if (!tinymce._openedxNeLCHijacked) {
-        console.log('tinymce: hacking the init script');
-        tinymce._openedxNeLCHijacked = true;
-        const originalTinyMCEInit = tinymce.init.bind(tinymce);
-        tinymce.init = function(params) {
-            console.log('tinymce: hijacked params', params);
-            // originalTinyMCEInit(params);
-        };
-    }
+    let inputer = () => {
+        function getRandomElement(arr) {
+          const randomIndex = Math.floor(Math.random() * arr.length);
+          return arr[randomIndex];
+        }
 
-    let inputer = `
-        <div class="wrapper-comp-setting">
-          <input class="input setting-input" type="text" id="prompt-html" value="">
-          <button class="action setting-clear active" type="button" name="setting-clear" value="حذف" data-tooltip="حذف">
-                <span class="icon fa fa-undo" aria-hidden="true"></span><span class="sr">"مسح القيمة"</span>
-          </button>
-        </div>
-    `;
+        const prompts = [
+            'Create a table with top 5 countries recovering from covid',
+            'List in 3 bullet points the main regions of Saudi Arabia',
+            'Create content on introduction of Computer Science in 4 paragraphs',
+        ];
+
+        return `
+            <div>
+                <style>
+                    .gpt-nelc-input .setting-input {
+                        border: 2px solid transparent;
+                        width: 98%;
+                        margin-inline-start: -2%;
+                        top: -9px;
+                        position: relative;
+                        height: 49px;
+                        border-radius: 4px;
+                        outline: none;
+                        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+                    }
+                    
+                    .gpt-nelc-input .setting-clear {               
+                        position: relative;
+                        top: -6px;
+                        right: 7px;
+                    }
+                    
+                    .gpt-nelc-input .setting-input.gpt-loading {
+                      animation: gpt-glow 1.5s ease-in-out infinite;
+                    }
+                    
+                    /* Animation keyframes for glowing effect */
+                    @keyframes gpt-glow {
+                      0% {
+                        border: 2px solid rgba(0, 0, 0, 0);
+                      }
+                      50% {
+                        border: 2px solid rgb(178, 178, 178, 0.5);
+                      }
+                      0% {
+                        border: 2px solid rgba(0, 0, 0, 0);
+                      }
+                    }
+                </style>
+                <div class="gpt-nelc-input wrapper-comp-setting">
+                    <form>
+                        <input class="input setting-input" placeholder="Example: ${getRandomElement(prompts)}" type="text" value="">
+                        <button class="action setting-clear active" type="button" name="setting-clear" value="حذف" data-tooltip="حذف">
+                              <span class="icon fa fa-undo" aria-hidden="true"></span><span class="sr">"مسح القيمة"</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            `;
+    };
+
+    setInterval(() => {
+        if ($('.modal-actions').length && !$('.modal-actions .gpt-nelc-input').length) {
+            console.log('tinymce: exists ', !!$('.edit-xblock-modal').length)
+            $('.modal-actions').prepend(inputer);
+            console.log('tinymce: added prompt');
+        }
+    }, 200);
+
+    $('body').on('click', '.gpt-nelc-input .setting-clear', () => {
+        $('.gpt-nelc-input .setting-input').val('');
+        return false;
+    });
+    
+    $('body').on('submit', '.gpt-nelc-input form', (e) => {
+        e.preventDefault();
+        $('.gpt-nelc-input .setting-input')
+            .addClass('gpt-loading')
+            .prop('disabled', true);
+
+        prompter($('.gpt-nelc-input .setting-input').val(), () => {
+            $('.gpt-nelc-input .setting-input')
+                .removeClass('gpt-loading')
+                .prop('disabled', false)
+                .val('');
+        });
+    });
 }());
