@@ -6,12 +6,19 @@ Serve it locally:
         $ python -m http.server 8080
 
     Terminal 2:
-        $ ssh -R omardotesting:80:localhost:18000 serveo.net
+        $ ngrok http --domain=caiman-central-perch.ngrok-free.app 18080
 
 
-Embed me into Open edX using the following script snippet:
+
+
+
+Embed me into production Open edX using the following script snippet:
     <script>var NELC_API_URL = xyz</script>
-    <script src="https://omardotesting.serveo.net/html-gpt-hack.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Zeit-Labs/HackGPTforHTML@<GIT_TAG_HERE>/html-gpt-hack.js"></script>
+
+Embed me into development Open edX using the following script snippet:
+    <script>var NELC_API_URL = xyz</script>
+    <script src="https://caiman-central-perch.ngrok-free.app/html-gpt-hack.js"></script>
 
  */
 
@@ -41,6 +48,10 @@ Embed me into Open edX using the following script snippet:
         return tinymce.get($('.modal-window textarea').attr('id'))
     };
 
+    const hasContentInMCE = () => {
+        return getMCE().getContent().trim().length > 20;
+    }
+
     const basePrompter = window.basePrompter = function (system, prompt, callback) {
         const mce = getMCE();
         apiCall(system, prompt, (html) => {
@@ -69,11 +80,13 @@ Embed me into Open edX using the following script snippet:
             
             Don't style the parent div.nelc-studio-gpt-html-prompt-v1, only style its content.
             
+            IMPORTANT: All styles must be prefixed with ".nelc-studio-gpt-html-prompt-v1".
+            
             If the user provides an HTML between "============ START OF USER HTML ============" and 
                 "============ END OF USER HTML ==============", edit the html to match the provided prompt.
         `;
 
-        if (getMCE().getContent().trim().length > 20) {
+        if (hasContentInMCE()) {
             prompt = `
                 Given the HTML below:
 
@@ -88,22 +101,22 @@ Embed me into Open edX using the following script snippet:
         basePrompter(system, prompt, callback);
     }
 
+    const getPlaceholder = () => {
+        return hasContentInMCE() ?
+            "عدّل على المحتوى باستخدام الذكاء الإصطناعي"
+            :
+            "أكتب لإنشاء محتوى بالذكاء الإصطناعي";
+    }
+
     let inputer = () => {
-        function getRandomElement(arr) {
-          const randomIndex = Math.floor(Math.random() * arr.length);
-          return arr[randomIndex];
-        }
-
-        const prompts = [
-            'Create a table with top 5 countries recovering from covid',
-            'List in 3 bullet points the main regions of Saudi Arabia',
-            'Create content on introduction of Computer Science in 4 paragraphs',
-        ];
-
         return `
             <div>
                 <style>
-                    .gpt-nelc-input .setting-input {
+                    .gpt-nelc-input-wrapper {
+                        margin-bottom: 1.5em;
+                    }
+                
+                    .gpt-nelc-input-wrapper .setting-input {
                         border: 2px solid rgb(178, 178, 178, 0.5);
                         width: 98%;
                         margin-inline-start: -2%;
@@ -114,35 +127,55 @@ Embed me into Open edX using the following script snippet:
                         outline: none;
                         box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
                     }
-                    
-                    .gpt-nelc-input .setting-clear {
-                        position: relative;
-                        top: -6px;
-                        right: 7px;
-                    }
-                    
-                    .gpt-nelc-input .setting-input.gpt-loading {
+
+                    .gpt-nelc-input-wrapper .setting-input.gpt-loading {
                       animation: gpt-glow 1.5s ease-in-out infinite;
+                      color: #868686;
                     }
                     
                     /* Animation keyframes for glowing effect */
                     @keyframes gpt-glow {
                       0% {
-                        border: 2px solid rgb(178, 178, 178, 0.5);
+                        border-color: rgb(178, 178, 178, 0.5);
                       }
                       50% {
-                        border: 2px solid transparent;
+                        border-color: rgba(135,135,135,0.5);
                       }
                       0% {
-                        border: 2px solid rgb(178, 178, 178, 0.5);
+                        border-color: rgb(178, 178, 178, 0.5);
                       }
                     }
+                    
+                    .gpt-nelc-input-wrapper .setting-send {
+                        transform: scale(-1, 1);
+                        position: relative;
+                        top: -5px;
+                        color: #0075b4;
+                        right: 3px;
+                        border: none;
+                        background: none;
+                        font-size: 1.5em;
+                    }
+                    
+                    .gpt-nelc-input-wrapper .setting-send .fa-spinner {
+                        display: none;
+                    }
+                    
+                    .gpt-nelc-input-wrapper .setting-send.gpt-loading .fa-spinner {
+                        display: inline-block;
+                    }
+                    
+                    .gpt-nelc-input-wrapper .setting-send.gpt-loading .fa-paper-plane {
+                        display: none;
+                    }
+                    
                 </style>
-                <div class="gpt-nelc-input wrapper-comp-setting">
+                <div class="gpt-nelc-input-wrapper wrapper-comp-setting">
                     <form>
-                        <input class="input setting-input" placeholder="Example: ${getRandomElement(prompts)}" type="text" value="">
-                        <button class="action setting-clear active" type="button" name="setting-clear" value="حذف" data-tooltip="حذف">
-                              <span class="icon fa fa-undo" aria-hidden="true"></span><span class="sr">"مسح القيمة"</span>
+                        <input class="gpt-input input setting-input" placeholder="${getPlaceholder()}" type="text" value="">
+                        <button class="gpt-input action setting-send active" type="button" data-tooltip="أرسل">
+                              <span class="icon fa fa-paper-plane"></span>
+                              <span class="icon fa fa-spinner fa-spin"></span>
                         </button>
                     </form>
                 </div>
@@ -151,29 +184,27 @@ Embed me into Open edX using the following script snippet:
     };
 
     setInterval(() => {
-        if ($('.modal-actions').length && !$('.modal-actions .gpt-nelc-input').length) {
+        if ($('.modal-actions').length && !$('.modal-actions .gpt-nelc-input-wrapper').length) {
             console.log('tinymce: exists ', !!$('.edit-xblock-modal').length)
             $('.modal-actions').prepend(inputer);
             console.log('tinymce: added prompt');
         }
     }, 200);
 
-    $('body').on('click', '.gpt-nelc-input .setting-clear', () => {
-        $('.gpt-nelc-input .setting-input').val('');
-        return false;
-    });
-    
-    $('body').on('submit', '.gpt-nelc-input form', (e) => {
+    $('body').on('submit', '.gpt-nelc-input-wrapper form', (e) => {
         e.preventDefault();
-        $('.gpt-nelc-input .setting-input')
+        $('.gpt-nelc-input-wrapper .gpt-input')
             .addClass('gpt-loading')
             .prop('disabled', true);
 
-        prompter($('.gpt-nelc-input .setting-input').val(), () => {
-            $('.gpt-nelc-input .setting-input')
+        prompter($('.gpt-nelc-input-wrapper .setting-input').val(), () => {
+            $('.gpt-nelc-input-wrapper .gpt-input')
                 .removeClass('gpt-loading')
-                .prop('disabled', false)
-                .val('');
+                .prop('disabled', false);
+
+            $('.gpt-nelc-input-wrapper .setting-input')
+                .val('')
+                .prop('placeholder', getPlaceholder());
         });
     });
 }());
