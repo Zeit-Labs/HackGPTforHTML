@@ -14,7 +14,7 @@ Serve it locally:
 
 Embed me into production Open edX using the following script snippet:
     <script>var NELC_API_URL = xyz</script>
-    <script src="https://cdn.jsdelivr.net/gh/Zeit-Labs/HackGPTforHTML@<GIT_TAG_HERE>/html-gpt-hack.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Zeit-Labs/HackGPTforHTML@v2/html-gpt-hack.js"></script>
 
 Embed me into development Open edX using the following script snippet:
     <script>var NELC_API_URL = xyz</script>
@@ -63,7 +63,7 @@ Embed me into development Open edX using the following script snippet:
 
     const prompter = window.prompter = function (prompt, callback) {
         const system = `
-            Act as a wysiwyg and write a piece of content to.
+            Act as a TinyMCE editor AI helper and write a piece of content to.
             Avoid returning JavaScript that facilitates XSS or any other injection or security issues.
             The output should be only HTML and CSS.
             
@@ -77,11 +77,11 @@ Embed me into development Open edX using the following script snippet:
                     CONTENT GOES HERE
                 </div>
             </div>
-            
-            Don't style the parent div.nelc-studio-gpt-html-prompt-v1, only style its content.
-            
-            IMPORTANT: All styles must be prefixed with ".nelc-studio-gpt-html-prompt-v1".
-            
+
+            IMPORTANT: Do not use nelc-studio-gpt-html-prompt-v1 in CSS.
+            IMPORTANT: Never style html tags directly but use CSS classes.
+            IMPORTANT: Always use unique CSS classes such as .n-gpt-87eba0cc30da.
+
             If the user provides an HTML between "============ START OF USER HTML ============" and 
                 "============ END OF USER HTML ==============", edit the html to match the provided prompt.
         `;
