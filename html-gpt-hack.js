@@ -14,7 +14,7 @@ Serve it locally:
 
 Embed me into production Open edX using the following script snippet:
     <script>var NELC_API_URL = xyz</script>
-    <script src="https://cdn.jsdelivr.net/gh/Zeit-Labs/HackGPTforHTML@v4/html-gpt-hack.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Zeit-Labs/HackGPTforHTML@v5/html-gpt-hack.js"></script>
 
 Embed me into development Open edX using the following script snippet:
     <script>var NELC_API_URL = xyz</script>
@@ -207,8 +207,7 @@ Embed me into development Open edX using the following script snippet:
         }
     }, 200);
 
-    $('body').on('submit', '.gpt-nelc-input-wrapper form', (e) => {
-        e.preventDefault();
+    const submit = () => {
         $('.gpt-nelc-input-wrapper .gpt-input')
             .addClass('gpt-loading')
             .prop('disabled', true);
@@ -222,5 +221,15 @@ Embed me into development Open edX using the following script snippet:
                 .val('')
                 .prop('placeholder', getPlaceholder());
         });
+    }
+
+    $('body').on('click', '.gpt-nelc-input-wrapper button', (e) => {
+       e.preventDefault();
+       submit();
+    });
+
+    $('body').on('submit', '.gpt-nelc-input-wrapper form', (e) => {
+        e.preventDefault();
+       submit();
     });
 }());
