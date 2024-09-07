@@ -14,7 +14,7 @@ Serve it locally:
 
 Embed me into production Open edX using the following script snippet:
     <script>var NELC_API_URL = xyz</script>
-    <script src="https://cdn.jsdelivr.net/gh/Zeit-Labs/HackGPTforHTML@v2/html-gpt-hack.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Zeit-Labs/HackGPTforHTML@v4/html-gpt-hack.js"></script>
 
 Embed me into development Open edX using the following script snippet:
     <script>var NELC_API_URL = xyz</script>
@@ -44,12 +44,30 @@ Embed me into development Open edX using the following script snippet:
             });
     }
 
+    const getTextarea = () => {
+        const textarea = $('.modal-window textarea');
+        return textarea;
+    }
+
+    function makeRandomId(length) {
+        let result = '';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const charactersLength = characters.length;
+        let counter = 0;
+        while (counter < length) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            counter += 1;
+        }
+        return result;
+    }
+
     const getMCE = () => {
-        return tinymce.get($('.modal-window textarea').attr('id'))
+        return tinymce.get(getTextarea().attr('id'));
     };
 
     const hasContentInMCE = () => {
-        return getMCE().getContent().trim().length > 20;
+        const contentLength = getMCE()?.getContent()?.trim()?.length;
+        return contentLength && (contentLength > 20);
     }
 
     const basePrompter = window.basePrompter = function (system, prompt, callback) {
@@ -62,6 +80,8 @@ Embed me into development Open edX using the following script snippet:
     };
 
     const prompter = window.prompter = function (prompt, callback) {
+        const parentClass = `n-gpt-${makeRandomId(9)}`;
+
         const system = `
             Act as a TinyMCE editor AI helper and write a piece of content to.
             Avoid returning JavaScript that facilitates XSS or any other injection or security issues.
@@ -69,18 +89,14 @@ Embed me into development Open edX using the following script snippet:
             
             Return the HTML in the following structure without head, body, html and other parent elements:
             
-            <div class="nelc-studio-gpt-html-prompt-v1">
                 <style>
                     STYLE GOES HERE
                 </style>
-                <div>
+                <div class="${parentClass}">
                     CONTENT GOES HERE
                 </div>
-            </div>
 
-            IMPORTANT: Do not use nelc-studio-gpt-html-prompt-v1 in CSS.
-            IMPORTANT: Never style html tags directly but use CSS classes.
-            IMPORTANT: Always use unique CSS classes such as .n-gpt-87eba0cc30da.
+            IMPORTANT: All CSS rules should be scoped in ${parentClass} CSS class.
 
             If the user provides an HTML between "============ START OF USER HTML ============" and 
                 "============ END OF USER HTML ==============", edit the html to match the provided prompt.
