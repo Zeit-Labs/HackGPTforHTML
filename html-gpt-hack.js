@@ -95,7 +95,9 @@ Embed me into development Open edX using the following script snippet:
             """
             IMPORTANT: All CSS rules should be scoped in ".${parentClass}" CSS class.
 
-            If the user provides an HTML between "============ START OF USER HTML ============"  and "============ END OF USER HTML ==============", edit the html to match the provided prompt and update the comment to include the last changes also.
+            Always respond in the same language as the prompt unless directed otherwise in the prompt.
+
+            If the user provides an HTML between "============ START OF USER HTML ============"  and "============ END OF USER HTML ==============", edit the html to match the provided prompt keep the original language unless directed otherwise and update the comment to include the last changes too.
         `
 
     if (hasContentInMCE()) {
