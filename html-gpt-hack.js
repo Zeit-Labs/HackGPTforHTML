@@ -88,13 +88,14 @@ Embed me into development Open edX using the following script snippet:
 
             Return the HTML in the following structure without head, body, html and other parent elements:
             """
+            <!-- in comments explain what the html is doing in natural language in details -->
             <style> {{ STYLE GOES HERE }} </style>
             <div class="${parentClass}"> {{ CONTENT GOES HERE }} </div>
             <script> {{ JAVASCRIPT GOES HERE }} </script>
             """
             IMPORTANT: All CSS rules should be scoped in ".${parentClass}" CSS class.
 
-            If the user provides an HTML between "============ START OF USER HTML ============"  and "============ END OF USER HTML ==============", edit the html to match the provided prompt.
+            If the user provides an HTML between "============ START OF USER HTML ============"  and "============ END OF USER HTML ==============", edit the html to match the provided prompt and update the comment to include the last changes also.
         `
 
     if (hasContentInMCE()) {
